@@ -574,14 +574,14 @@ const bool *const *const GraphML::getAdjacencyMatrix(void)
     }
 }
 
-// Übergebene Matrix freigeben.
-void GraphML::freeMatrix(const bool *const *const AdjM)
+// Übergebene Matrix freigeben. (Statische Methode!)
+void GraphML::freeMatrix(const bool *const *const AdjM, uint8_t nodes)
 {
     // Übergebenes Const-Objekt "entconsten"
     bool **matrix = const_cast<bool **>(AdjM);
 
     // Durch Knoten iterieren und Zeilenweise freigeben:
-    for (uint8_t i = 0; i < this->getnodes(); i++)
+    for (uint8_t i = 0; i < nodes; i++)
     {
         free(matrix[i]);
     }
