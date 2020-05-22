@@ -1,27 +1,29 @@
 #ifndef ML_CONTAINER_H
 #define ML_CONTAINER_H
 
-#include <cstdint>
+#include <cstdint> // Integer-Typen
 
 namespace nsGraphML {
 
-    enum EdgeType { directed, undirected };
-    enum GraphObject { graph, node, edge, all };
+    enum EdgeType { directed, undirected }; // lt. sizeof() 4 Bytes
+    enum GraphObject { graph, node, edge, all }; // lt. sizeof() 4 Bytes
 
     struct Key {
         char* id; // 8 Bytes
         char* attrname; // 8 Bytes
         char* attrtype; // 8 Bytes
         char* _default; // 8 Bytes
-        enum GraphObject _for; // n.def. in Standart
+        enum GraphObject _for; // n.def. in Standart (sizeof() ergab 4 Bytes)
+        //unsigned:4; // 4 Padding-Bytes
 
+        // Destruktor
         ~Key(void) {
             free(id);
             free(attrname);
             free(attrtype);
             free(_default);
         }
-    }; // min 32 Bytes + enum...
+    }; // 40 Bytes (inkl. 4 Padding-Bytes)
 
     struct Data {
         char* key; // 8 Bytes
@@ -42,8 +44,9 @@ namespace nsGraphML {
         uint8_t dcount; // 1 Byte
         // fortlaufende Nummer
         uint8_t no; // 1 Byte
-        //unsigned:7; // 6 Padding Bytes
+        //unsigned:6; // 6 Padding Bytes
 
+        // Destruktor
         ~Node(void) {
             free(id);
 
@@ -76,8 +79,10 @@ namespace nsGraphML {
         // Anzahl data-Elements
         uint8_t dcount; // 1 Byte
         // Gerichtet/Ungerichtet
-        enum EdgeType type; // n. def. in Standart
+        enum EdgeType type; // n. def. in Standart (sizeof() ergab 4 Bytes)
+        //unsigned:7; // 7 Padding-Bytes
 
+        // Destruktor
         ~Edge(void) {
             free(id);
             free(source);
@@ -98,7 +103,7 @@ namespace nsGraphML {
             // Zum Schluss Zeigerarray freigeben:
             free(datas);
         }
-    };
+    }; // 40 Bytes (7 Padding Bytes)
 }
 
 #endif // ml_container.h

@@ -32,15 +32,12 @@ GraphML::GraphML(const char *filepath)
 
         // XML Datei mit Graphen öffnen:
         file.open(filepath);
-
-        // dazu: vector anlegen, ...
+        // dazu: vector mit Iterator anlegen, ...
         std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        // ... der XML komplett einliest.
+        // ... der XML komplett einliest:
         buffer.push_back('\0');
-
-        // Parst den Vector in das xmldoc
+        // Parst den Vector in das xmldoc:
         doc.parse<0>(&buffer[0]);
-
         // Den root-Knoten finden:
         root_node = doc.first_node("graphml");
 
@@ -110,6 +107,7 @@ GraphML::GraphML(const char *filepath)
         // 3. Graph Attribute abrufen               GRAPH
         // ####################################
 
+        // Enthält den "graph"-Node, der die weitere Definition des Graphen enthält:
         xml_node<> *graph_node = root_node->first_node("graph");
 
         // - id
@@ -192,13 +190,13 @@ GraphML::GraphML(const char *filepath)
         // ####################################
 
         // Speicherverwaltung (Siehe bei Nodes/Keys/Data)
-        this->edges = (Edge*)calloc(0, sizeof(Edge));
+        this->edges = (Edge *)calloc(0, sizeof(Edge));
 
         // durch edge-Knoten iterieren:
         for (xml_node<> *nodes = graph_node->first_node("edge"); nodes; nodes = nodes->next_sibling("edge"))
         {
             // Speicher reallokieren: (Erklärung siehe andere For-Schleifen darüber)
-            this->edges = (Edge*)realloc(this->edges, (this->edge_counter + 1) * sizeof(Edge)); // 1 mehr als vorher
+            this->edges = (Edge *)realloc(this->edges, (this->edge_counter + 1) * sizeof(Edge)); // 1 mehr als vorher
             // Referenz als Hilfsvariable und auf letztes Element (aktuelles) referenzieren:
             Edge &edge_ref = this->edges[this->edge_counter];
             // Anzahl Kanten-Knoten inkrementieren:
@@ -287,8 +285,9 @@ GraphML::~GraphML(void)
 
     // 1. Nodes freigeben
     // dazu durch alle iterieren:
-    for (int8_t i = 0; i < this->node_counter; i++) {
-        Node& node_ref = this->nodes[i]; // Hilfsreferenz
+    for (int8_t i = 0; i < this->node_counter; i++)
+    {
+        Node &node_ref = this->nodes[i]; // Hilfsreferenz
 
         // für jeden Node den Destruktor aufrufen um Member freizugeben:
         // (ruft damit verbunden auch den Destruktor für jedes Data Objekt auf! (siehe Destruktor Node))
@@ -300,8 +299,9 @@ GraphML::~GraphML(void)
 
     // 2. Edges freigeben
     // dazu durch alle iterieren:
-    for (uint8_t i = 0; i < this->edge_counter; i++) {
-        Edge& edge_ref = this->edges[i]; // Hilfsreferenz
+    for (uint8_t i = 0; i < this->edge_counter; i++)
+    {
+        Edge &edge_ref = this->edges[i]; // Hilfsreferenz
 
         // für jede Edge den Destruktr aufrufen um Member freizugeben:
         // (ruft damit verbunden auch den Destruktor für jedes Data Objekt auf! (siehe Destruktor Edge))
@@ -329,7 +329,7 @@ bool GraphML::valid(void)
         /* ******************************************************************
         *   ANZAHL KNOTEN & KANTEN:
         *   Es müssen mindestens so viele Kanten wie Knoten vorhanden sein, jedoch höchstens v*(v-1)/2.
-        *  *****************************************************************/ 
+        *  *****************************************************************/
         if (this->edge_counter < (this->node_counter - 1) || (this->edge_counter > (this->edge_counter * (this->edge_counter - 1) / 2)))
         {
             throw "Unzulässige Anzahl Kanten im Verhältnis zu Knoten";
@@ -341,17 +341,19 @@ bool GraphML::valid(void)
         *  *****************************************************************/
 
         // Lambda-Funktion zum Handling mit Nullzeigern
-        auto inline func = [](void* ptr) -> void { 
-            if ( ptr == nullptr ) throw "Nullzeiger entdeckt!";
+        auto inline func = [](void *ptr) -> void {
+            if (ptr == nullptr)
+                throw "Nullzeiger entdeckt!";
         };
 
         // *********************************
         // Keys:
         //
         // durch Keys iterieren...
-        for (uint8_t i = 0; i < this->key_counter; i++) {
+        for (uint8_t i = 0; i < this->key_counter; i++)
+        {
             // ... bei jedem Key die Eigenschaften anschauen
-            Key& key_ref = this->keys[i]; // Hilfsreferenz
+            Key &key_ref = this->keys[i]; // Hilfsreferenz
 
             func(key_ref.id);
             func(key_ref.attrname);
@@ -361,15 +363,17 @@ bool GraphML::valid(void)
 
         // *********************************
         // Nodes:
-        // 
+        //
         // durch Nodes iterieren...
-        for (uint8_t i = 0; i < this->node_counter; i++) {
+        for (uint8_t i = 0; i < this->node_counter; i++)
+        {
             // ... bei jedem Node die Eigenschaften anschauen
-            Node& node_ref = this->nodes[i]; // Hilfsreferenz
+            Node &node_ref = this->nodes[i]; // Hilfsreferenz
 
             // dabei: durch die Data-Eigenschaften eines Nodes iterieren:
-            for (uint8_t j = 0; j < node_ref.dcount; j++) {
-                Data& data_ref = node_ref.datas[j]; // Hilfsreferenz
+            for (uint8_t j = 0; j < node_ref.dcount; j++)
+            {
+                Data &data_ref = node_ref.datas[j]; // Hilfsreferenz
 
                 func(data_ref.key);
                 func(data_ref.value);
@@ -381,15 +385,17 @@ bool GraphML::valid(void)
 
         // *********************************
         // Edges:
-        // 
+        //
         // durch Edge iterieren...
-        for (uint8_t i = 0; i < this->edge_counter; i++) {
-            // ... bei jedem Edge die Eigenschafte anschauen
-            Edge& edge_ref = this->edges[i]; // Hilfsreferenz
+        for (uint8_t i = 0; i < this->edge_counter; i++)
+        {
+            // ... bei jedem Edge die Eigenschaften anschauen
+            Edge &edge_ref = this->edges[i]; // Hilfsreferenz
 
             // dabei: durch die Data-Eigenschaften eines Edge iterieren:
-            for (uint8_t j = 0; j < edge_ref.dcount; j++) {
-                Data& data_ref = edge_ref.datas[j]; // Hilfsreferenz
+            for (uint8_t j = 0; j < edge_ref.dcount; j++)
+            {
+                Data &data_ref = edge_ref.datas[j]; // Hilfsreferenz
 
                 func(data_ref.key);
                 func(data_ref.value);
@@ -408,26 +414,31 @@ bool GraphML::valid(void)
         // Dazu: Durch alle Knoten iterieren und ihre id's in eine Liste aufnehmen.
         // Anschließend durch alle Edges iterieren und deren source/target Attribut
         // mit dieser Liste vergleichen:
-        std::vector<char*> n_ids; // enthält die Zeiger auf die id's der Knoten
+        std::vector<char *> n_ids; // enthält die Zeiger auf die id's der Knoten
         // durch Nodes iterieren:
-        for (uint8_t i = 0; i < this->node_counter; i++) {
-            Node& node_ref = this->nodes[i]; // Hilfsreferenz
+        for (uint8_t i = 0; i < this->node_counter; i++)
+        {
+            Node &node_ref = this->nodes[i]; // Hilfsreferenz
 
             // id in vector aufnehmen:
-            n_ids.push_back( node_ref.id );
+            n_ids.push_back(node_ref.id);
         }
 
         // durch Edges iterieren:
-        for (uint8_t i = 0; i < this->edge_counter; i++) {
-            Edge& edge_ref = this->edges[i]; // Hilfsreferenz
+        for (uint8_t i = 0; i < this->edge_counter; i++)
+        {
+            Edge &edge_ref = this->edges[i]; // Hilfsreferenz
 
             bool sourcefound = false;
             bool targetfound = false;
 
             // source & target mit vector abgleichen
-            for (char* const& value: n_ids) {
-                if ( strcmp(value, edge_ref.source) == 0 ) sourcefound = true;
-                if ( strcmp(value, edge_ref.target) == 0 ) targetfound = true; // hier nicht mit else if unterscheiden! Denn:
+            for (char *const &value : n_ids)
+            {
+                if (strcmp(value, edge_ref.source) == 0)
+                    sourcefound = true;
+                if (strcmp(value, edge_ref.target) == 0)
+                    targetfound = true; // hier nicht mit else if unterscheiden! Denn:
                 // zu diesem Zeitpunkt wäre es noch gestattet, eine Schleife, also Ausgangs- und Zielknoten identisch, zu haben.
                 // dies wird erst in graphstructure ausgeschlossen.
             }
@@ -446,17 +457,20 @@ bool GraphML::valid(void)
         *  *****************************************************************/
         // Alle attr.name in eine Liste aufnehmen und vorher prüfen ob sie schon Teil deren ist:
         // Durch Keys iterieren:
-        std::vector<char*> k_attrname; // Enthält Zeiger auf key-Id's
+        std::vector<char *> k_attrname; // Enthält Zeiger auf key-Id's
 
         // durch alle Key iterieren:
-        for (uint8_t i = 0; i < this->key_counter; i++) {
-            Key& key_ref = this->keys[i]; // Hilfsreferenz
+        for (uint8_t i = 0; i < this->key_counter; i++)
+        {
+            Key &key_ref = this->keys[i]; // Hilfsreferenz
 
             // jedes Element des Vectors anschauen und prüfen ob das aktuelle key_ref bereits aufgenommen ist:
-            for (char* const& value: k_attrname) {
-                if (strcmp(value, key_ref.attrname) == 0) {
+            for (char *const &value : k_attrname)
+            {
+                if (strcmp(value, key_ref.attrname) == 0)
+                {
                     // Es befindet sich bereits ein key-Attribut mit gleicher id im Graphen.
-                    // Das ist nicht zulässig, da GraphML vorschreibt, dass ID für key im 
+                    // Das ist nicht zulässig, da GraphML vorschreibt, dass ID für key im
                     // gesamte Graphen einzigartig sein müssen.
                     throw "Doppeltes Key-Attribut entdeckt";
                 }
@@ -469,12 +483,11 @@ bool GraphML::valid(void)
         *  *****************************************************************/
         // Nur die id des Graphen prüfen:
         func(this->id);
-
     }
     catch (const std::exception &e)
     {
         // Bei einer Exception wird hier reingesprungen, der Fehler ausgegeben und false zurückgegeben.
-        // Führt dazu, dass die Fehlersuche bei fehlerhaftem XML länger dauert, weil nur ein Fehler pro 
+        // Führt dazu, dass die Fehlersuche bei fehlerhaftem XML länger dauert, weil nur ein Fehler pro
         // Iteration von valid() ausgegeben werden kann.
         std::cerr << e.what() << std::endl;
         return false;
