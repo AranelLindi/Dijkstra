@@ -192,13 +192,13 @@ GraphML::GraphML(const char *filepath)
         // ####################################
 
         // Speicherverwaltung (Siehe bei Nodes/Keys/Data)
-        this->edges = (Edge *)calloc(0, sizeof(Edge));
+        this->edges = (Edge*)calloc(0, sizeof(Edge));
 
         // durch edge-Knoten iterieren:
         for (xml_node<> *nodes = graph_node->first_node("edge"); nodes; nodes = nodes->next_sibling("edge"))
         {
             // Speicher reallokieren: (Erklärung siehe andere For-Schleifen darüber)
-            this->edges = (Edge *)realloc(this->edges, (this->edge_counter + 1) * sizeof(Edge)); // 1 mehr als vorher
+            this->edges = (Edge*)realloc(this->edges, (this->edge_counter + 1) * sizeof(Edge)); // 1 mehr als vorher
             // Referenz als Hilfsvariable und auf letztes Element (aktuelles) referenzieren:
             Edge &edge_ref = this->edges[this->edge_counter];
             // Anzahl Kanten-Knoten inkrementieren:
@@ -282,6 +282,34 @@ GraphML::GraphML(const char *filepath)
 GraphML::~GraphML(void)
 {
     // Alle Objekte freigeben:
+    // da neue Objekte mit malloc-basierten Funktionen allokiert wurden,
+    // muss der Destruktor sämtlicher Objekte selbst aufgerufen werden:
+
+    // 1. Nodes freigeben
+    // dazu durch alle iterieren:
+    for (int8_t i = 0; i < this->node_counter; i++) {
+        Node& node_ref = this->nodes[i]; // Hilfsreferenz
+
+        // für jeden Node den Destruktor aufrufen um Member freizugeben:
+        // (ruft damit verbunden auch den Destruktor für jedes Data Objekt auf! (siehe Destruktor Node))
+        node_ref.~Node();
+
+        // danach das gesamte Struct freigeben:
+        free(&node_ref);
+    }
+
+    // 2. Edges freigeben
+    // dazu durch alle iterieren:
+    for (uint8_t i = 0; i < this->edge_counter; i++) {
+        Edge& edge_ref = this->edges[i]; // Hilfsreferenz
+
+        // für jede Edge den Destruktr aufrufen um Member freizugeben:
+        // (ruft damit verbunden auch den Destruktor für jedes Data Objekt auf! (siehe Destruktor Edge))
+        edge_ref.~Edge();
+
+        // danach das gesamte Struct freigeben:
+        free(&edge_ref);
+    }
 
     // Alle Kanten und Knoten freigeben
     free(this->edges);
@@ -313,7 +341,7 @@ bool GraphML::valid(void)
         *  *****************************************************************/
 
         // Lambda-Funktion zum Handling mit Nullzeigern
-        auto func = [](void* ptr) -> void { 
+        auto inline func = [](void* ptr) -> void { 
             if ( ptr == nullptr ) throw "Nullzeiger entdeckt!";
         };
 

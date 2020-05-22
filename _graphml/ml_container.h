@@ -16,10 +16,10 @@ namespace nsGraphML {
         enum GraphObject _for; // n.def. in Standart
 
         ~Key(void) {
-            delete[] id;
-            delete[] attrname;
-            delete[] attrtype;
-            delete[] _default;
+            free(id);
+            free(attrname);
+            free(attrtype);
+            free(_default);
         }
     }; // min 32 Bytes + enum...
 
@@ -28,8 +28,8 @@ namespace nsGraphML {
         char* value; // 8 Bytes
 
         ~Data(void) {
-            delete[] key;
-            delete[] value;
+            free(key);
+            free(value);
         }
     }; // 16 Bytes
 
@@ -45,8 +45,22 @@ namespace nsGraphML {
         //unsigned:7; // 6 Padding Bytes
 
         ~Node(void) {
-            delete[] id;
-            delete[] datas;
+            free(id);
+
+            // Data Objekte freigeben!
+            // Dazu durch alle Data's iterieren und Destruktor aufrufen
+            for (uint8_t i = 0; i < this->dcount; i++) {
+                Data& data_ref = this->datas[i]; // Hilfsreferenz
+
+                // für jede Data den Destruktor aufrufen um Member freizugeben:
+                data_ref.~Data();
+
+                // danach das gesamte Struct freigeben:
+                free(&data_ref);
+            }
+            
+            // Zum Schluss Zeigerarray freigeben:
+            free(datas);
         }
     }; // 24 Bytes
 
@@ -65,10 +79,24 @@ namespace nsGraphML {
         enum EdgeType type; // n. def. in Standart
 
         ~Edge(void) {
-            delete[] id;
-            delete[] source;
-            delete[] target;
-            delete[] datas;
+            free(id);
+            free(source);
+            free(target);
+            
+            // Data Objekte freigeben!
+            // Dazu durch alle Data's iterieren und Destruktor aufrufen
+            for (uint8_t i = 0; i < this->dcount; i++) {
+                Data& data_ref = this->datas[i]; // Hilfsreferenz
+
+                // für jede Data den Destruktor aufrufen um Member freizugeben:
+                data_ref.~Data();
+
+                // danach das gesamte Struct freigeben:
+                free(&data_ref);
+            }
+            
+            // Zum Schluss Zeigerarray freigeben:
+            free(datas);
         }
     };
 }
