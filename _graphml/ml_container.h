@@ -38,9 +38,11 @@ namespace nsGraphML {
         char* id; // 8 Bytes
         // Array Data-Objekte
         struct Data* datas; // 8 Bytes
+        // Anzahl data-Elements
+        uint8_t dcount; // 1 Byte
         // fortlaufende Nummer
         uint8_t no; // 1 Byte
-        unsigned:7; // 7 Padding Bytes
+        //unsigned:7; // 6 Padding Bytes
 
         ~Node(void) {
             delete[] id;
@@ -57,6 +59,8 @@ namespace nsGraphML {
         char* target; // 8 Bytes
         // Array Data-Objekte
         struct Data* datas; // 8 Bytes
+        // Anzahl data-Elements
+        uint8_t dcount; // 1 Byte
         // Gerichtet/Ungerichtet
         enum EdgeType type; // n. def. in Standart
 

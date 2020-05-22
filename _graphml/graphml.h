@@ -1,5 +1,5 @@
-#ifndef RGRAPHML_H
-#define RGRAPHML_H
+#ifndef GRAPHML_H
+#define GRAPHML_H
 
 // Standartbibliothek
 #include <cstdlib> // Speicherplatzverwaltung
@@ -34,17 +34,23 @@ public:
     GraphML(const char* filepath); // Konstruktor
     ~GraphML(void); // Destruktor
 
+    // Grundsätzliche Validierung des Graphen (nur bedingt logische Prüfung!)
     bool valid(void); // kann für Validierung des Graphen verwendet werden. Wirft Exceptions!
 
-    uint8_t inline getkeys(void); // Anzahl key-Elemente
-    uint8_t inline getnodes(void); // Anzahl Knoten
-    uint8_t inline getedges(void); // Anzahl Kanten
+    // Anzahl key-Elemente
+    uint8_t inline getkeys(void); 
+    // Anzahl Knoten
+    uint8_t inline getnodes(void);
+    // Anzahl Kanten
+    uint8_t inline getedges(void);
 
+    // Liefert Adjazenzmatrix des Graphen
     const bool *const *const getAdjacencyMatrix(void);
+    // Gibt die Adjazenzmatrix des Graphen frei
     void freeMatrix(const bool *const *const matrix);
 
 };
 
 
 
-#endif // rgraphml.h
+#endif // graphml.h
